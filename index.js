@@ -26,6 +26,7 @@ class Sprite{
             height: 50
         }
         this.isAttacking
+        this.health = 100
     }
 
     draw(){
@@ -110,7 +111,27 @@ function rectangularCollision({rectangle1, rectangle2}){
     return (rectangle1.attackBox.position.x + rectangle1.attackBox.width >= rectangle2.position.x && rectangle1.attackBox.position.x <= rectangle2.position.x + rectangle2.width
         && rectangle1.attackBox.position.y + rectangle1.attackBox.height >= rectangle2.position.y && rectangle1.attackBox.position.y <= rectangle2.position.y + rectangle2.height)
 }
+let timer = 20
+function decreaseTimer(){
+    if (timer>0) {
+        setTimeout(decreaseTimer, 1000)
+        timer--
+        document.querySelector('#timer').innerHTML = timer
+    }
 
+    if (timer === 0){
+        document.querySelector('#displayText').style.display = 'flex'
+        if (player.health === enemy.health){
+            document.querySelector('#displayText').innerHTML = 'Tie'
+        }else if(player.health > enemy.health){
+            document.querySelector('#displayText').innerHTML = 'Player #1 wins'
+        }else if(player.health < enemy.health){
+            document.querySelector('#displayText').innerHTML = 'Player #2 wins'
+        } 
+    }
+}
+
+decreaseTimer()
 function animate(){
     window.requestAnimationFrame(animate)
     c.fillStyle = 'black'
@@ -137,7 +158,15 @@ function animate(){
     //detect for collision
     if(rectangularCollision({rectangle1: player, rectangle2: enemy}) && player.isAttacking){
             player.isAttacking = false
+            enemy.health -= 20
+            document.querySelector('#enemyHealth').style.width = enemy.health + "%"
     }
+
+    if(rectangularCollision({rectangle1: enemy, rectangle2: player}) && enemy.isAttacking){
+        enemy.isAttacking = false
+        player.health -= 20
+            document.querySelector('#playerHealth').style.width = player.health + "%"
+}
 }
 
 animate()
@@ -168,6 +197,9 @@ window.addEventListener('keydown', (event) => {
          break
         case ' ':
          player.attack()   
+         break
+        case 'ArrowDown':
+         enemy.attack()  
          break 
     }
 })
