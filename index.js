@@ -8,60 +8,15 @@ canvas.height = 576
 
 c.fillRect(0, 0, canvas.width, canvas.height)
 
-class Sprite{
-    constructor({position, velocity, color, offset}){
-        this.position = position
-        this.velocity = velocity
-        this.width = 50
-        this.height = 150
-        this.lastKey
-        this.color = color
-        this.attackBox = {
-            position: {
-                x: this.position.x,
-                y: this.position.y
-            },
-            offset,
-            width: 100,
-            height: 50
-        }
-        this.isAttacking
-        this.health = 100
-    }
+const background = new Sprite({
+    position: {
+        x: 0,
+        y: 0
+    },
+    imageSrc: './Assets/background.png'
+})
 
-    draw(){
-        c.fillStyle = this.color
-        c.fillRect(this.position.x, this.position.y, this.width, this.height)
-
-        //attack box
-        if(this.isAttacking){
-        c.fillStyle = 'orange'
-        c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height)
-        }
-    }
-
-    update(){
-        this.draw()
-
-        this.attackBox.position.x = this.position.x + this.attackBox.offset.x
-        this.attackBox.position.y = this.position.y
-        this.position.x += this.velocity.x
-        this.position.y += this.velocity.y
-
-        if(this.position.y + this.height + this.velocity.y >= canvas.height){
-            this.velocity.y = 0
-        }else this.velocity.y += gravity
-    }
-
-    attack(){
-        this.isAttacking = true
-        setTimeout(() => {
-            this.isAttacking = false
-        },100)
-    }
-}
-
-const player = new Sprite({
+const player = new Fighter({
     position:{
     x: 0,
     y: 0
@@ -70,14 +25,36 @@ const player = new Sprite({
     x: 0,
     y: 0
 },
-    color: 'red',
     offset: {
         x: 0,
         y: 0
+    },
+    imageSrc: './Assets/Player1/Sprites/Idle.png',
+    framesMax: 8,
+    scale: 2.5,
+    offset: {
+        x:100,
+        y:150
+    },
+    sprites: {
+        idle: {
+            imageSrc: './Assets/Player1/Sprites/Idle.png',
+            framesMax: 8
+        },
+        run: {
+            imageSrc: './Assets/Player1/Sprites/Run.png',
+            framesMax: 8,
+            image: new Image()
+        },
+        jump: {
+            imageSrc: './Assets/Player1/Sprites/Jump.png',
+            framesMax: 2,
+            image: new Image()
+        },
     }
 })
 
-const enemy = new Sprite({
+const enemy = new Fighter({
     position:{
     x: 400,
     y: 100
@@ -85,7 +62,6 @@ const enemy = new Sprite({
     velocity:{
     x: 0,
     y: 0},
-    color: 'blue',
     offset: {
         x: -50,
         y: 0
@@ -107,53 +83,31 @@ const keys = {
     }
 }
 
-function rectangularCollision({rectangle1, rectangle2}){
-    return (rectangle1.attackBox.position.x + rectangle1.attackBox.width >= rectangle2.position.x && rectangle1.attackBox.position.x <= rectangle2.position.x + rectangle2.width
-        && rectangle1.attackBox.position.y + rectangle1.attackBox.height >= rectangle2.position.y && rectangle1.attackBox.position.y <= rectangle2.position.y + rectangle2.height)
-}
 
-function determineWinner({player, enemy, timerId}){
-    clearTimeout(timerId)
-    document.querySelector('#displayText').style.display = 'flex'
-    if (player.health === enemy.health){
-        document.querySelector('#displayText').innerHTML = 'Tie'
-    }else if(player.health > enemy.health){
-        document.querySelector('#displayText').innerHTML = 'Player #1 wins'
-    }else if(player.health < enemy.health){
-        document.querySelector('#displayText').innerHTML = 'Player #2 wins'
-    }
-    window.cancelAnimationFrame(animationId)
-}
-
-let timer = 60
-let timerId
-let animationId
-function decreaseTimer(){
-    if (timer>0) {
-        timerId = setTimeout(decreaseTimer, 1000)
-        timer--
-        document.querySelector('#timer').innerHTML = timer
-    }
-
-    if (timer === 0){
-        determineWinner({player, enemy, timerId})
-    }
-}
 
 decreaseTimer()
 function animate(){
     animationId = window.requestAnimationFrame(animate)
     c.fillStyle = 'black'
     c.fillRect(0, 0, canvas.width, canvas.height)
+    background.update()
     player.update()
-    enemy.update()
+    //enemy.update()
 
     //player movement
     player.velocity.x = 0
+    player.switchSprite('idle')
     if(keys.a.pressed && player.lastKey === 'a'){
         player.velocity.x = -5
+        player.image = player.sprites.run.image
     }else if(keys.d.pressed && player.lastKey === 'd'){
         player.velocity.x = 5
+        player.image = player.sprites.run.image
+    }
+
+    if(player.velocity.y < 0) {
+        player.image = player.sprites.jump.image
+        player.framesMax = player.sprites.jump.framesMax
     }
 
     //enemy movement
