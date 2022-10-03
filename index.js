@@ -44,13 +44,29 @@ const player = new Fighter({
         run: {
             imageSrc: './Assets/Player1/Sprites/Run.png',
             framesMax: 8,
-            image: new Image()
+            
         },
         jump: {
             imageSrc: './Assets/Player1/Sprites/Jump.png',
             framesMax: 2,
-            image: new Image()
+
         },
+        fall: {
+            imageSrc: './Assets/Player1/Sprites/Fall.png',
+            framesMax: 2,
+        },
+        attack1: {
+            imageSrc: './Assets/Player1/Sprites/Attack1.png',
+            framesMax: 6,
+        }
+    },
+    attackBox: {
+        offset: {
+            x: 200,
+            y: 50
+        },
+        width: 170,
+        height: 50
     }
 })
 
@@ -62,9 +78,45 @@ const enemy = new Fighter({
     velocity:{
     x: 0,
     y: 0},
+
+    imageSrc: './Assets/Player2/Sprites/Idle.png',
+    framesMax: 4,
+    scale: 2.5,
     offset: {
-        x: -50,
-        y: 0
+        x:215,
+        y:165
+    },
+    sprites: {
+        idle: {
+            imageSrc: './Assets/Player2/Sprites/Idle.png',
+            framesMax: 4
+        },
+        run: {
+            imageSrc: './Assets/Player2/Sprites/Run.png',
+            framesMax: 8,
+            
+        },
+        jump: {
+            imageSrc: './Assets/Player2/Sprites/Jump.png',
+            framesMax: 2,
+
+        },
+        fall: {
+            imageSrc: './Assets/Player2/Sprites/Fall.png',
+            framesMax: 2,
+        },
+        attack1: {
+            imageSrc: './Assets/Player2/Sprites/Attack1.png',
+            framesMax: 4,
+        }
+    },
+    attackBox: {
+        offset: {
+            x: -280,
+            y: 50
+        },
+        width: 170,
+        height: 50
     }
 })
 
@@ -92,43 +144,67 @@ function animate(){
     c.fillRect(0, 0, canvas.width, canvas.height)
     background.update()
     player.update()
-    //enemy.update()
+    enemy.update()
 
     //player movement
     player.velocity.x = 0
-    player.switchSprite('idle')
+    
     if(keys.a.pressed && player.lastKey === 'a'){
         player.velocity.x = -5
-        player.image = player.sprites.run.image
+        player.switchSprite('run')
     }else if(keys.d.pressed && player.lastKey === 'd'){
         player.velocity.x = 5
-        player.image = player.sprites.run.image
+        player.switchSprite('run')
+    }else {
+        player.switchSprite('idle')
     }
-
+    //jumping
     if(player.velocity.y < 0) {
-        player.image = player.sprites.jump.image
-        player.framesMax = player.sprites.jump.framesMax
+        player.switchSprite('jump')
+    }else if (player.velocity.y >0){
+        player.switchSprite('fall')
     }
 
     //enemy movement
     enemy.velocity.x = 0
     if(keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft'){
         enemy.velocity.x = -5
+        enemy.switchSprite('run')
     }else if(keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight'){
         enemy.velocity.x = 5
+        enemy.switchSprite('run')
+    }else {
+        enemy.switchSprite('idle')
+    }
+
+     //jumping
+     if(enemy.velocity.y < 0) {
+        enemy.switchSprite('jump')
+    }else if (enemy.velocity.y >0){
+        enemy.switchSprite('fall')
     }
 
     //detect for collision
-    if(rectangularCollision({rectangle1: player, rectangle2: enemy}) && player.isAttacking){
+    if(rectangularCollision({rectangle1: player, rectangle2: enemy}) && player.isAttacking && player.framesCurrent === 4){
             player.isAttacking = false
             enemy.health -= 20
             document.querySelector('#enemyHealth').style.width = enemy.health + "%"
     }
 
-    if(rectangularCollision({rectangle1: enemy, rectangle2: player}) && enemy.isAttacking){
+    //if player misses
+    if (player.isAttacking && player.framesCurrent === 4){
+        player.isAttacking = false
+    }
+
+    if(rectangularCollision({rectangle1: enemy, rectangle2: player}) && enemy.isAttacking && enemy.framesCurrent === 2){
         enemy.isAttacking = false
         player.health -= 20
             document.querySelector('#playerHealth').style.width = player.health + "%"
+    }
+
+    //if player misses
+    if (enemy.isAttacking && enemy.framesCurrent === 2){
+        enemy.isAttacking = false
     }
 
     //end game based on health
