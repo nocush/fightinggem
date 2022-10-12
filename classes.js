@@ -43,7 +43,7 @@ class Sprite{
 }
 
 class Fighter extends Sprite{
-    constructor({position, velocity, color, imageSrc, scale = 1, framesMax = 1,  offset = {x: 0, y: 0}, sprites, attackBox = {offset: {}, width: undefined, height: undefined}}){
+    constructor({position, velocity, imageSrc, scale = 1, framesMax = 1,  offset = {x: 0, y: 0}, sprites, attackBox = {offset: {}, width: undefined, height: undefined}}){
         super({
             position,
             imageSrc,
