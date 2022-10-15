@@ -239,7 +239,7 @@ function animate(){
 animate()
 
 window.addEventListener('keydown', (event) => {
-    if (!player.dead){
+    if (!player.dead && tie !== true){
     switch(event.key){
         case 'd':
          keys.d.pressed = true
@@ -260,7 +260,7 @@ window.addEventListener('keydown', (event) => {
          break
     }
     }
-    if (!enemy.dead){
+    if (!enemy.dead && tie !== true){
     switch(event.key){
         case 'ArrowRight':
             keys.ArrowRight.pressed = true
